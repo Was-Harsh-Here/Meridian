@@ -1,4 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   AlarmClock,
   BookOpen,
@@ -59,12 +67,22 @@ import { DeadlineCountdownSection } from './components/DeadlineCountdownSection'
 import { HabitTrackerSection } from './components/HabitTrackerSection';
 import { CalendarWorkspace } from './components/CalendarWorkspace';
 import { ExecutiveAssistantPanel } from './components/ExecutiveAssistantPanel';
-import { InsightsAndQuestsView } from './components/InsightsAndQuestsView';
 import { JournalWorkspace } from './components/JournalWorkspace';
 import { OpportunitiesHub } from './components/OpportunitiesHub';
 import { ClockAlarmCenter } from './components/ClockAlarmCenter';
-import { SystemSanctum3D } from './components/SystemSanctum3D';
 import { EventModal, HabitModal } from './components/Modals';
+
+const InsightsAndQuestsView = lazy(() =>
+  import('./components/InsightsAndQuestsView').then((m) => ({
+    default: m.InsightsAndQuestsView,
+  }))
+);
+
+const SystemSanctum3D = lazy(() =>
+  import('./components/SystemSanctum3D').then((m) => ({
+    default: m.SystemSanctum3D,
+  }))
+);
 import {
   OfflineIndicator,
   PWAInstallButton,
@@ -2546,20 +2564,28 @@ Give me a brief psychological reflection and 1 concrete routine adjustment if he
             )}
 
             {activeTab === 'quests' && (
-              <InsightsAndQuestsView
-                state={state}
-                quests={computedQuests}
-                todayDate={todayDate}
-                ollamaConfig={ollamaConfig}
-                onClaimQuest={handleClaimQuest}
-                onBuyStreakShield={handleBuyStreakShield}
-                onActivateDoubleXp={handleActivateDoubleXp}
-                onUpdatePreferences={handleUpdatePreferences}
-                onUpdateOllamaConfig={setOllamaConfig}
-                onClearSystemLogs={handleClearSystemLogs}
-                onRunOverduePenaltyAudit={() => runOverduePenaltyAudit(true)}
-                onResetDemo={handleResetDemo}
-              />
+              <Suspense
+                fallback={
+                  <div className="sl-panel sl-reticle p-6 text-xs font-mono text-slate-500 dark:text-sky-300">
+                    Loading Quests, Analytics &amp; Execution Logs...
+                  </div>
+                }
+              >
+                <InsightsAndQuestsView
+                  state={state}
+                  quests={computedQuests}
+                  todayDate={todayDate}
+                  ollamaConfig={ollamaConfig}
+                  onClaimQuest={handleClaimQuest}
+                  onBuyStreakShield={handleBuyStreakShield}
+                  onActivateDoubleXp={handleActivateDoubleXp}
+                  onUpdatePreferences={handleUpdatePreferences}
+                  onUpdateOllamaConfig={setOllamaConfig}
+                  onClearSystemLogs={handleClearSystemLogs}
+                  onRunOverduePenaltyAudit={() => runOverduePenaltyAudit(true)}
+                  onResetDemo={handleResetDemo}
+                />
+              </Suspense>
             )}
           </div>
 
@@ -2738,15 +2764,25 @@ Give me a brief psychological reflection and 1 concrete routine adjustment if he
       <OfflineIndicator />
 
       {sanctumOpen && (
-        <SystemSanctum3D
-          habits={state.habits}
-          todayDate={todayDate}
-          level={rankInfo.level}
-          rankTitle={rankInfo.rankTitle}
-          totalXp={totalXp}
-          onToggleHabit={handleToggleHabit}
-          onClose={() => setSanctumOpen(false)}
-        />
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-50 bg-[#050811] flex items-center justify-center p-6">
+              <div className="sl-panel sl-reticle px-5 py-4 text-xs font-mono text-sky-300">
+                Initializing 3D System Sanctum...
+              </div>
+            </div>
+          }
+        >
+          <SystemSanctum3D
+            habits={state.habits}
+            todayDate={todayDate}
+            level={rankInfo.level}
+            rankTitle={rankInfo.rankTitle}
+            totalXp={totalXp}
+            onToggleHabit={handleToggleHabit}
+            onClose={() => setSanctumOpen(false)}
+          />
+        </Suspense>
       )}
 
       {toastMessage && (

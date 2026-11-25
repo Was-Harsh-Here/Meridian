@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -752,6 +753,7 @@ function executeToolCall(
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', 1);
   app.use(express.json({ limit: '4mb' }));
 
   app.get('/api/health', (_req, res) => {
@@ -1457,8 +1459,16 @@ ${JSON.stringify(sources)}`,
   });
 
   const httpServer = http.createServer(app);
+  const distPath = path.resolve(__dirname, 'dist');
+  const distIndexPath = path.join(distPath, 'index.html');
+  const runningViaTsx =
+    process.execArgv.some((arg) => arg.includes('tsx')) ||
+    process.env.npm_lifecycle_event === 'dev';
+  const useProductionStatic =
+    process.env.NODE_ENV === 'production' ||
+    (!runningViaTsx && fs.existsSync(distIndexPath));
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (!useProductionStatic) {
     const { createServer: createViteServer } = await import('vite');
     const hmrDisabled = process.env.DISABLE_HMR === 'true';
     const vite = await createViteServer({
@@ -1491,7 +1501,7 @@ ${JSON.stringify(sources)}`,
           if (body.includes('wsTransport.connect')) {
             body = body
               .replace(/await wsTransport\.connect\(handlers\);/g, 'return;')
-              .replace(/\bws\.send\(/g, 'ws?.send(')
+              .replace(/\b(ws|socket)\.send\(/g, '$1?.send(')
               .replace(
                 /new WebSocket\(([^)]*)\)/g,
                 '({ readyState: 3, close() {}, addEventListener() {}, removeEventListener() {}, send() {} })'
@@ -1512,10 +1522,34 @@ ${JSON.stringify(sources)}`,
 
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.use(
+      express.static(distPath, {
+        index: 'index.html',
+        setHeaders: (res, filePath) => {
+          const base = path.basename(filePath);
+          if (
+            base === 'index.html' ||
+            base === 'sw.js' ||
+            base === 'manifest.webmanifest'
+          ) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          }
+        },
+      })
+    );
+
+    app.get('*', (req, res) => {
+      if (
+        req.path.startsWith('/api/') ||
+        req.path.startsWith('/assets/') ||
+        Boolean(path.extname(req.path))
+      ) {
+        return res.status(404).end();
+      }
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.sendFile(distIndexPath);
     });
   }
 

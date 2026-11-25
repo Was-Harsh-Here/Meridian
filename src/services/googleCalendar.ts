@@ -1,40 +1,57 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import {
-  getAuth,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithPopup,
-  User,
-} from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { CalendarEvent } from '../types';
 
 export const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-const provider = new GoogleAuthProvider();
-SCOPES.forEach((scope) => provider.addScope(scope));
-
 let isSigningIn = false;
 // Access token strictly cached in memory only (never localStorage/sessionStorage)
 let cachedAccessToken: string | null = null;
+
+async function loadFirebaseAuth() {
+  const [{ initializeApp, getApps, getApp }, authMod] = await Promise.all([
+    import('firebase/app'),
+    import('firebase/auth'),
+  ]);
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const auth = authMod.getAuth(app);
+  const provider = new authMod.GoogleAuthProvider();
+  SCOPES.forEach((scope) => provider.addScope(scope));
+  return { auth, provider, authMod };
+}
 
 export const initGoogleAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
   onAuthFailure?: (user: User | null) => void
 ) => {
-  return onAuthStateChanged(auth, (user) => {
-    if (user && cachedAccessToken) {
-      onAuthSuccess?.(user, cachedAccessToken);
-    } else if (!isSigningIn) {
-      if (!user) {
-        cachedAccessToken = null;
+  let cancelled = false;
+  let unsubscribe: (() => void) | null = null;
+
+  loadFirebaseAuth()
+    .then(({ auth, authMod }) => {
+      if (cancelled) return;
+      unsubscribe = authMod.onAuthStateChanged(auth, (user) => {
+        if (user && cachedAccessToken) {
+          onAuthSuccess?.(user, cachedAccessToken);
+        } else if (!isSigningIn) {
+          if (!user) {
+            cachedAccessToken = null;
+          }
+          onAuthFailure?.(user);
+        }
+      });
+    })
+    .catch(() => {
+      // Gracefully ignore when third-party storage or Firebase Auth is blocked (e.g. iOS Private Mode)
+      if (!cancelled) {
+        onAuthFailure?.(null);
       }
-      onAuthFailure?.(user);
-    }
-  });
+    });
+
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
 };
 
 export const signInWithGoogleCalendar = async (): Promise<{
@@ -43,8 +60,9 @@ export const signInWithGoogleCalendar = async (): Promise<{
 }> => {
   isSigningIn = true;
   try {
-    const result = await signInWithPopup(auth, provider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const { auth, provider, authMod } = await loadFirebaseAuth();
+    const result = await authMod.signInWithPopup(auth, provider);
+    const credential = authMod.GoogleAuthProvider.credentialFromResult(result);
     if (!credential?.accessToken) {
       throw new Error('Could not obtain Google Calendar access token.');
     }
@@ -57,7 +75,12 @@ export const signInWithGoogleCalendar = async (): Promise<{
 
 export const signOutGoogleCalendar = async () => {
   cachedAccessToken = null;
-  await auth.signOut();
+  try {
+    const { auth } = await loadFirebaseAuth();
+    await auth.signOut();
+  } catch {
+    // Ignore sign-out errors if auth never initialized
+  }
 };
 
 export const getCachedGoogleToken = (): string | null => cachedAccessToken;
@@ -128,9 +151,14 @@ export async function pushEventToGoogleCalendar(
   accessToken: string,
   event: CalendarEvent
 ): Promise<string> {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
-  const startDateTime = new Date(`${event.date}T${event.startTime}:00`).toISOString();
-  const endDateTime = new Date(`${event.date}T${event.endTime}:00`).toISOString();
+  const timeZone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+  const startDateTime = new Date(
+    `${event.date}T${event.startTime}:00`
+  ).toISOString();
+  const endDateTime = new Date(
+    `${event.date}T${event.endTime}:00`
+  ).toISOString();
 
   const body = {
     summary: event.title,
