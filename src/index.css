@@ -1,0 +1,317 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Rajdhani", "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Bespoke Solo Leveling System Window Frame, Mana Glow & Border Overlay */
+.sl-grid-canvas {
+  background-image:
+    radial-gradient(ellipse 85% 40% at 50% -5%, rgba(37, 99, 235, 0.06), transparent 68%),
+    linear-gradient(to right, rgba(15, 23, 42, 0.032) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.032) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+}
+
+.dark .sl-grid-canvas {
+  background-image:
+    radial-gradient(ellipse 85% 45% at 50% -10%, rgba(56, 189, 248, 0.14), transparent 72%),
+    radial-gradient(ellipse 60% 35% at 85% 100%, rgba(37, 99, 235, 0.1), transparent 70%),
+    linear-gradient(to right, rgba(56, 189, 248, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+.sl-panel {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.96);
+  background-image:
+    linear-gradient(90deg, transparent 4%, rgba(37, 99, 235, 0.28) 50%, transparent 96%),
+    radial-gradient(ellipse 80% 42% at 50% 0%, rgba(59, 130, 246, 0.045), transparent 70%);
+  background-size: 100% 1px, 100% 100%;
+  background-position: top center, top center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 8px 24px -16px rgba(30, 64, 175, 0.16),
+    0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sl-panel:hover {
+  border-color: rgba(37, 99, 235, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 28px -16px rgba(37, 99, 235, 0.22),
+    0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.dark .sl-panel {
+  background-color: rgba(8, 14, 30, 0.9);
+  background-image:
+    linear-gradient(90deg, transparent 4%, rgba(56, 189, 248, 0.72) 50%, transparent 96%),
+    linear-gradient(90deg, transparent 15%, rgba(56, 189, 248, 0.24) 50%, transparent 85%),
+    radial-gradient(ellipse 82% 48% at 50% 0%, rgba(56, 189, 248, 0.085), transparent 72%);
+  background-size: 100% 1px, 100% 1px, 100% 100%;
+  background-position: top center, bottom center, top center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(186, 230, 253, 0.2),
+    inset 0 0 22px -12px rgba(56, 189, 248, 0.16),
+    0 0 22px -10px rgba(14, 165, 233, 0.26),
+    0 14px 34px -18px rgba(2, 132, 199, 0.42);
+}
+
+.dark .sl-panel:hover {
+  border-color: rgba(56, 189, 248, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(186, 230, 253, 0.28),
+    inset 0 0 26px -12px rgba(56, 189, 248, 0.22),
+    0 0 28px -8px rgba(56, 189, 248, 0.34),
+    0 16px 38px -18px rgba(2, 132, 199, 0.5);
+}
+
+/* Emergency Quest Amber-Crimson Rim Variant */
+.sl-panel-alert {
+  background-image:
+    linear-gradient(90deg, transparent 4%, rgba(217, 119, 6, 0.55) 50%, transparent 96%),
+    radial-gradient(ellipse 80% 45% at 50% 0%, rgba(245, 158, 11, 0.06), transparent 72%);
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(254, 243, 199, 0.65),
+    0 10px 26px -14px rgba(217, 119, 6, 0.2);
+}
+
+.dark .sl-panel-alert {
+  background-image:
+    linear-gradient(90deg, transparent 4%, rgba(251, 191, 36, 0.78) 50%, transparent 96%),
+    linear-gradient(90deg, transparent 15%, rgba(245, 158, 11, 0.26) 50%, transparent 85%),
+    radial-gradient(ellipse 82% 48% at 50% 0%, rgba(245, 158, 11, 0.1), transparent 72%);
+  border-color: rgba(251, 191, 36, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(253, 230, 138, 0.24),
+    inset 0 0 22px -12px rgba(245, 158, 11, 0.16),
+    0 0 24px -10px rgba(245, 158, 11, 0.28),
+    0 14px 34px -18px rgba(180, 83, 9, 0.4);
+}
+
+/* Precision corner reticle ticks on System HUD windows */
+.sl-reticle::before,
+.sl-reticle::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sl-reticle::before {
+  top: 0;
+  left: 0;
+  border-top: 2px solid #1d4ed8;
+  border-left: 2px solid #1d4ed8;
+  border-top-left-radius: 5px;
+}
+
+.sl-reticle::after {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid #1d4ed8;
+  border-right: 2px solid #1d4ed8;
+  border-bottom-right-radius: 5px;
+}
+
+.dark .sl-reticle::before {
+  border-top-color: #38bdf8;
+  border-left-color: #38bdf8;
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.65));
+}
+
+.dark .sl-reticle::after {
+  border-bottom-color: #38bdf8;
+  border-right-color: #38bdf8;
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.65));
+}
+
+.dark .sl-panel-alert.sl-reticle::before {
+  border-top-color: #fbbf24;
+  border-left-color: #fbbf24;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6));
+}
+
+.dark .sl-panel-alert.sl-reticle::after {
+  border-bottom-color: #fbbf24;
+  border-right-color: #fbbf24;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6));
+}
+
+/* Subtle Luminous Rim for Sticky Header, Desktop Rail & Mobile Dock */
+.dark .sl-chrome-top {
+  box-shadow:
+    inset 0 -1px 0 rgba(56, 189, 248, 0.22),
+    0 6px 24px -14px rgba(14, 165, 233, 0.35);
+}
+
+.dark .sl-chrome-bottom {
+  box-shadow:
+    inset 0 1px 0 rgba(56, 189, 248, 0.26),
+    0 -8px 26px -14px rgba(14, 165, 233, 0.38);
+}
+
+.dark .sl-chrome-side {
+  box-shadow:
+    inset -1px 0 0 rgba(56, 189, 248, 0.16),
+    4px 0 28px -18px rgba(14, 165, 233, 0.3);
+}
+
+/* Viewport-level non-blocking System Frame Overlay */
+.sl-viewport-overlay {
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+}
+
+.dark .sl-viewport-overlay {
+  box-shadow:
+    inset 0 0 0 1px rgba(56, 189, 248, 0.16),
+    inset 0 0 42px -18px rgba(14, 165, 233, 0.24);
+}
+
+.sl-chamfer {
+  clip-path: polygon(
+    8px 0%,
+    100% 0%,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0% 100%,
+    0% 8px
+  );
+}
+
+@keyframes xp-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-xp-shimmer {
+  animation: xp-shimmer 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-xp-shimmer {
+    animation: none;
+  }
+}
+
+/* Official Sign in with Google button styling */
+.gsi-material-button {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #0f172a;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  height: 40px;
+  letter-spacing: 0.1px;
+  outline: none;
+  overflow: hidden;
+  padding: 0 14px;
+  position: relative;
+  text-align: center;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  vertical-align: middle;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .gsi-material-button {
+  background-color: #0d162c;
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #f8fafc;
+}
+
+.gsi-material-button:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.dark .gsi-material-button:hover {
+  background-color: #13203f;
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.gsi-material-button .gsi-material-button-content-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.gsi-material-button .gsi-material-button-icon {
+  height: 18px;
+  width: 18px;
+  min-width: 18px;
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.28);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Meridian — Executive Habit & Routine OS",
+  "description": "A gamified habit tracker and executive AI personal assistant that manages your daily calendar, routines, and progression.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
